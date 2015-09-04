@@ -1,0 +1,16 @@
+# Don't add merge originals.
+**/*.orig
+
+# Don't add emacs temp files.
+**/*~
+
+# omit converage files
+*.cov
+
+# omit profiler output
+*.jl.cov
+*.jl.mem
+
+# skip swap files
+*.swp
+\#*
