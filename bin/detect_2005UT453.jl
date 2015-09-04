@@ -66,6 +66,9 @@ end
 
 
 @doc """
+Computes the unnormalized log likelihood for a particular
+candidate asteroid (higher is better)
+
 arguments:
   ast: parameters for a candidate asteroid
   img: an astronomical image
