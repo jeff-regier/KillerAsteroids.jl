@@ -73,7 +73,7 @@ arguments:
   ast: parameters for a candidate asteroid
   img: an astronomical image
 """ ->
-function compute_log_likelihood(ast::AsteroidParams, img::Image)
+function compute_log_probability(ast::AsteroidParams, img::Image)
     log_prior = logpdf(r_prior, ast.r) * logpdf(v_prior, ast.v)
 
     log_like = 0.
@@ -93,10 +93,10 @@ const test_img = generate_sample_synthetic_image()
 
 
 const good_ast = AsteroidParams(1000., [20, 12.], [3.1, 5.1])
-good_ll = compute_log_likelihood(good_ast, test_img)
+good_ll = compute_log_probability(good_ast, test_img)
 
 const bad_ast = AsteroidParams(1000., [19.4, 12.], [3.1, 5.1])
-bad_ll = compute_log_likelihood(bad_ast, test_img)
+bad_ll = compute_log_probability(bad_ast, test_img)
 
 println("$good_ll > $bad_ll")
 @assert good_ll > bad_ll
