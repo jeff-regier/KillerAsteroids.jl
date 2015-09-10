@@ -1,6 +1,8 @@
 using FITSIO
 
-function wise_psf(band; sidelen=-1)
+function wise_psf(band::Int64; halfsidelen::Int64=-1)
+
+  # PSF cutout returned will have dimensions (2*halfsidelen+1, 2*halfsielen+1)
 
   # don't believe any sensible normalization is in place, need to fix that ...
 
@@ -9,30 +11,28 @@ function wise_psf(band; sidelen=-1)
   # figure out where the PSF model FITS file is located
   psf_dir = ENV["WISE_ETC"]
 
-  psf_fname_dict = [1=>"psf_coeff-w1.v1.fits",
-                    2=>"psf_coeff-w2.v1.fits",
-                    3=>"psf_coeff-big.fits",
-                    4=>"psf_coeff-taper-w4.fits" ]
+  psf_fnames = ["psf_coeff-w1.v1.fits",
+                "psf_coeff-w2.v1.fits",
+                "psf_coeff-big.fits",
+                "psf_coeff-taper-w4.fits" ]
 
-  psf_fname = psf_fname_dict[band]
-  psf_fname = string(psf_dir, "/", psf_fname)
+  psf_fname = psf_fnames[band]
+  psf_fname = joinpath(psf_dir, psf_fname)
   
   f = FITS(psf_fname)
   psf_model = read(f[1])
+  close(f)
 
   # for now just return the zeroth order term, add higher orders later
   psf_model = psf_model[:,:,1]
 
-  # even sidelengths won't really make sense in my opinion as
-  # middle of central pixel will not be the center of the PSF in that case
-  if (sidelen != -1) & ((sidelen % 2) != 0)
-      # 1-indexing ...
+  if (halfsidelen != -1)
       sz = size(psf_model, 1)
-      pixcen = int(ceil(sz/2))
-      half = int(floor(sidelen/2))
-      # will break if sidelen is greater than PSF model size ...
-      psf_model = psf_model[(pixcen-half):(pixcen+half),
-                            (pixcen-half):(pixcen+half)]
+      @assert 2*halfsidelen < sz
+      pixcen = ceil(Int, sz/2)
+      # will break if 2*halfsidelen+1 is larger than PSF model sidelength
+      psf_model = psf_model[(pixcen-halfsidelen):(pixcen+halfsidelen),
+                            (pixcen-halfsidelen):(pixcen+halfsidelen)]
   end
 
   return psf_model
