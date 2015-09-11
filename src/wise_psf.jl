@@ -1,6 +1,21 @@
 using FITSIO
 
-function wise_psf(band::Int64; halfsidelen::Int64=-1)
+function wise_psf(band::Int64, halfsidelen::Int64)
+
+  return wise_psf_sidelen(band, halfsidelen)
+end
+
+function wise_psf(band::Int64)
+
+  # if no halfsidelen value has been specified, assume user wants full PSF
+
+  sidelens = [325, 325, 499, 285]
+  halfsidelen = floor(Int, sidelens[band]/2)
+
+  return wise_psf_sidelen(band, halfsidelen)
+end
+
+function wise_psf_sidelen(band::Int64, halfsidelen::Int64)
 
   # PSF cutout returned will have dimensions (2*halfsidelen+1, 2*halfsielen+1)
 
@@ -26,14 +41,12 @@ function wise_psf(band::Int64; halfsidelen::Int64=-1)
   # for now just return the zeroth order term, add higher orders later
   psf_model = psf_model[:,:,1]
 
-  if (halfsidelen != -1)
-      sz = size(psf_model, 1)
-      @assert 2*halfsidelen < sz
-      pixcen = ceil(Int, sz/2)
-      # will break if 2*halfsidelen+1 is larger than PSF model sidelength
-      psf_model = psf_model[(pixcen-halfsidelen):(pixcen+halfsidelen),
-                            (pixcen-halfsidelen):(pixcen+halfsidelen)]
-  end
+  sz = size(psf_model, 1)
+  @assert 2*halfsidelen < sz
+  pixcen = ceil(Int, sz/2)
+  # will break if 2*halfsidelen+1 is larger than PSF model sidelength
+  psf_model = psf_model[(pixcen-halfsidelen):(pixcen+halfsidelen),
+                        (pixcen-halfsidelen):(pixcen+halfsidelen)]
 
   return psf_model
 end
