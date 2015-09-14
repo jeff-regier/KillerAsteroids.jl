@@ -8,6 +8,7 @@ VERSION < v"0.4.0-dev" && using Docile
 import FITSIO
 import WCSLIB
 using Distributions
+include("../src/wise_psf.jl")
 
 
 const r_prior = LogNormal(1500., sqrt(500)) # mode is 1000
@@ -37,7 +38,7 @@ type AsteroidParams
 end
 
 
-function generate_sample_synthetic_image()
+function generate_sample_synthetic_image(use_wise_psf)
     H, W = 30, 30
     epsilon = 2.2
     iota = 42.0
@@ -47,12 +48,18 @@ function generate_sample_synthetic_image()
         pixels[h, w] = wrapped_poisson(epsilon * iota)
     end
 
-    bvn_for_psf = MvNormal([2.99, 3.01], [0.2 0; 0 0.2])
-    psf = Array(Float64, 5, 5)
-    for w2 in 1:5, h2 in 1:5
-        psf[h2, w2] = pdf(bvn_for_psf, [h2, w2])
-    end
-    psf /= sum(psf)
+    if use_wise_psf
+        wise_band = 3
+        halfsidelen = 2
+        psf = wise_psf(wise_band, halfsidelen) # sidelength will be 2*2 + 1
+    else
+        bvn_for_psf = MvNormal([2.99, 3.01], [0.2 0; 0 0.2])
+        psf = Array(Float64, 5, 5)
+        for w2 in 1:5, h2 in 1:5
+            psf[h2, w2] = pdf(bvn_for_psf, [h2, w2])
+        end
+     end
+     psf /= sum(psf)
 
     ast = AsteroidParams(1000., [20, 12.], [3.1, 5.1])
     for w2 in 1:5, h2 in 1:5
@@ -87,8 +94,10 @@ function compute_log_probability(ast::AsteroidParams, img::Image)
     log_prior + log_like
 end
 
+sz_args = (size(ARGS))[1]
+use_wise_psf = ((sz_args[1] > 0) && (ARGS[1] == "wise"))
 
-const test_img = generate_sample_synthetic_image()
+const test_img = generate_sample_synthetic_image(use_wise_psf)
 @assert test_img.pixels[20, 12] > 300
 
 
