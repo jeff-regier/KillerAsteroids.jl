@@ -12,7 +12,7 @@ before_install:
 
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.build("GSL"); Pkg.build("KillerAsteroids"); Pkg.test("KillerAsteroids"; coverage=true)'
+  - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.build("KillerAsteroids"); Pkg.test("KillerAsteroids"; coverage=true)'
 
 after_success:
   - julia -e 'cd(Pkg.dir("KillerAsteroids")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
