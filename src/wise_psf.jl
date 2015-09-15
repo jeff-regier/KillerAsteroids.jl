@@ -1,10 +1,5 @@
-module WisePSF
 
-VERSION < v"0.4.0-dev" && using Docile
-using FITSIO
-
-
-function load_psf(band_id::Int64)
+function load_wise_psf(band_id::Int64)
     # TODO: sensible normalization
     # TODO: checks on the input values(?)
 
@@ -27,12 +22,12 @@ function load_psf(band_id::Int64)
 end
 
 
-@doc """
+"""
 Returns a PSF cutout returned with dimensions 
   (2*halfsidelen+1, 2*halfsielen+1).
-"""->
-function load_psf(band_id::Int64, halfsidelen::Int64)
-    psf_model = load_psf(band_id)
+"""
+function load_wise_psf(band_id::Int64, halfsidelen::Int64)
+    psf_model = load_wise_psf(band_id)
 
     sz = size(psf_model, 1)
     @assert sz == size(psf_model, 2)
@@ -45,4 +40,3 @@ function load_psf(band_id::Int64, halfsidelen::Int64)
     psf_model[pixrange, pixrange]
 end
 
-end

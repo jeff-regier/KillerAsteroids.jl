@@ -1,19 +1,11 @@
-module Probability
-
-VERSION < v"0.4.0-dev" && using Docile
-
-using Distributions
-using ModelInit
-
-
-@doc """
+"""
 Computes the unnormalized log likelihood for a particular
 candidate asteroid (higher is better)
 
 arguments:
   ast: parameters for a candidate asteroid
   img: an astronomical image
-""" ->
+"""
 function compute_log_probability(ast::AsteroidParams, img::Image, prior::Prior)
     log_prior = logpdf(prior.r, ast.r) * logpdf(prior.v, ast.v)
 
@@ -28,4 +20,3 @@ function compute_log_probability(ast::AsteroidParams, img::Image, prior::Prior)
     log_prior + log_like
 end
 
-end

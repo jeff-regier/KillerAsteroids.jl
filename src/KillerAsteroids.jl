@@ -1,16 +1,14 @@
 module KillerAsteroids
 
-require(joinpath(Pkg.dir("KillerAsteroids"), "src", "WisePSF.jl"))
-require(joinpath(Pkg.dir("KillerAsteroids"), "src", "ModelInit.jl"))
-require(joinpath(Pkg.dir("KillerAsteroids"), "src", "Synthetic.jl"))
-require(joinpath(Pkg.dir("KillerAsteroids"), "src", "Probability.jl"))
+using FITSIO
+using WCSLIB
+using Distributions
 
-import WisePSF
-import Synthetic
-import Probability
+include("model_types.jl")
+include("model_probability.jl")
+include("wise_psf.jl")
 
-using ModelInit
-
-export Image, AsteroidParams, Prio
+export Image, AsteroidParams, Prior
+export compute_log_probability
 
 end # module

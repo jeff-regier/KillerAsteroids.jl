@@ -1,13 +1,4 @@
-module ModelInit
-
-VERSION < v"0.4.0-dev" && using Docile
-
-export Image, AsteroidParams, Prior
-
-using Distributions
-
-
-@doc """An image, taken though a particular filter band""" ->
+"""An image, taken though a particular filter band"""
 type Image
     H::Int64  # The image height.
     W::Int64  # The image width.
@@ -18,7 +9,7 @@ type Image
     t::Float64  # the time the image was taken (Or is this an integer?)
 end
 
-@doc """The parameters that characterize a single asteroid""" ->
+"""The parameters that characterize a single asteroid"""
 type AsteroidParams
     r::Float64  # brightness in nanomaggies
     u::Vector{Float64}  # position at time 0
@@ -37,8 +28,5 @@ function sample_prior()
     v_prior = MvNormal([3., 5], [4. 1; 3 2]) # pixels / second
 
     Prior(r_prior, v_prior)
-end
-
-
 end
 

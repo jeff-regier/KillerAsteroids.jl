@@ -1,7 +1,4 @@
-module Synthetic
-
 using Distributions
-using ModelInit
 
 
 function wrapped_poisson(rate::Float64)
@@ -41,5 +38,3 @@ function generate_sample_image()
     generate_sample_image(psf)
 end
 
-
-end

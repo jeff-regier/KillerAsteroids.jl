@@ -1,18 +1,20 @@
 using KillerAsteroids
 using Base.Test
 
+include("sample_data.jl")
+
 
 function test_truth_most_likely_with_all_synthetic_data()
-    const test_img = Synthetic.generate_sample_image()
+    const test_img = generate_sample_image()
     @test test_img.pixels[20, 12] > 300
 
-    prior = ModelInit.sample_prior()
+    prior = KillerAsteroids.sample_prior()
 
     const good_ast = AsteroidParams(1000., [20, 12.], [3.1, 5.1])
-    good_ll = Probability.compute_log_probability(good_ast, test_img, prior)
+    good_ll = compute_log_probability(good_ast, test_img, prior)
 
     const bad_ast = AsteroidParams(1000., [19.4, 12.], [3.1, 5.1])
-    bad_ll = Probability.compute_log_probability(bad_ast, test_img, prior)
+    bad_ll = compute_log_probability(bad_ast, test_img, prior)
 
     info("$good_ll > $bad_ll")
     @test good_ll > bad_ll
@@ -22,19 +24,19 @@ end
 function test_truth_most_likely_with_wise_psf()
     band_id = 3
     halfsidelen = 2
-    psf = WisePSF.load_psf(band_id, halfsidelen) # sidelength will be 2*2 + 1
+    psf = KillerAsteroids.load_wise_psf(band_id, halfsidelen) # sidelength will be 2*2 + 1
     psf /= sum(psf)
 
-    const test_img = Synthetic.generate_sample_image(psf)
+    const test_img = generate_sample_image(psf)
     @test test_img.pixels[20, 12] > 300
 
-    prior = ModelInit.sample_prior()
+    prior = KillerAsteroids.sample_prior()
 
     const good_ast = AsteroidParams(1000., [20, 12.], [3.1, 5.1])
-    good_ll = Probability.compute_log_probability(good_ast, test_img, prior)
+    good_ll = compute_log_probability(good_ast, test_img, prior)
 
     const bad_ast = AsteroidParams(1000., [19.4, 12.], [3.1, 5.1])
-    bad_ll = Probability.compute_log_probability(bad_ast, test_img, prior)
+    bad_ll = compute_log_probability(bad_ast, test_img, prior)
 
     info("$good_ll > $bad_ll")
     @test good_ll > bad_ll
