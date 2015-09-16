@@ -8,7 +8,7 @@ function test_truth_most_likely_with_all_synthetic_data()
     const test_img = generate_sample_image()
     @test test_img.pixels[20, 12] > 300
 
-    prior = KillerAsteroids.sample_prior()
+    prior = sample_prior()
 
     const good_ast = AsteroidParams(1000., [20, 12.], [3.1, 5.1])
     good_ll = compute_log_probability(good_ast, test_img, prior)
@@ -24,13 +24,13 @@ end
 function test_truth_most_likely_with_wise_psf()
     band_id = 3
     halfsidelen = 2
-    psf = KillerAsteroids.load_wise_psf(band_id, halfsidelen) # sidelength will be 2*2 + 1
+    psf = load_wise_psf(band_id, halfsidelen) # sidelength will be 2*2 + 1
     psf /= sum(psf)
 
     const test_img = generate_sample_image(psf)
     @test test_img.pixels[20, 12] > 300
 
-    prior = KillerAsteroids.sample_prior()
+    prior = sample_prior()
 
     const good_ast = AsteroidParams(1000., [20, 12.], [3.1, 5.1])
     good_ll = compute_log_probability(good_ast, test_img, prior)

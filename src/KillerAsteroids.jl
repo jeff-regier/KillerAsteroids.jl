@@ -10,5 +10,6 @@ include("wise_psf.jl")
 
 export Image, AsteroidParams, Prior
 export compute_log_probability
+export load_wise_psf
 
 end # module
