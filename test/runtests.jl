@@ -50,6 +50,5 @@ end
 
 
 test_truth_most_likely_with_all_synthetic_data()
-#TODO: comment this test in once data from WISE_ETC is in our `dat` directory
-#test_truth_most_likely_with_wise_psf()
+test_truth_most_likely_with_wise_psf()
 test_truth_most_likely_with_all_real_data()
