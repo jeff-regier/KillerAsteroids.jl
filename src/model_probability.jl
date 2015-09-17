@@ -5,6 +5,8 @@ end
 
 """
 Returns the position of the asteroid at time t.
+Note: Can make this a nonlinear function here in the future, once the time
+of integration is months or years rather than hours.
 args
   - u0: position of the asteroid at time 0.
   - v: velocity of the asteroid
@@ -23,8 +25,11 @@ function compute_log_likelihood(ast::AsteroidParams, img::Image)
     for w2 in 1:psf_dims[2], h2 in 1:psf_dims[1]
         h = u_t_px[1] + h2 - psf_center[1]
         w = u_t_px[2] + w2 - psf_center[2]
-        expected_x = img.iota * (img.epsilon + ast.r * img.psf[h2, w2])
-        ll += logpdf(Poisson(expected_x), round(Int, img.pixels[h, w]))
+        expected_nmgy = img.sky_noise_mean + ast.r * img.psf[h2, w2]
+        expected_dn = expected_nmgy / img.nmgy_per_dn
+        pixel_dn_var = expected_dn + img.read_noise_var
+        pixel_dist = Normal(expected_dn, sqrt(pixel_dn_var))
+        ll += logpdf(pixel_dist, img.pixels[h, w])
     end
     ll
 end
