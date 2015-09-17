@@ -9,12 +9,13 @@ end
 function generate_sample_image(psf::Matrix{Float64})
     H, W = 30, 30
     nmgy_per_dn = 1 / 112
-    sky_noise_mean = 2.2
-    read_noise_var = 0.3
+    sky_noise_mean = 2.2  # in nanomaggies
+    read_noise_var = 0.3  # in DN
     gain = 4.4  # Not sure if gain matters...pixel fluxes in DN are Poisson, 
                 #right?, not pixels fluxes nn # of photoelectrons?
 
-    pixel_var = sky_noise_mean + read_noise_var
+    sky_noise_dn = sky_noise_mean / nmgy_per_dn
+    pixel_var = sky_noise_dn + read_noise_var
     sky_read_rv = Normal(sky_noise_mean, sqrt(pixel_var))
     pixels = rand(sky_read_rv, H, W)
 
