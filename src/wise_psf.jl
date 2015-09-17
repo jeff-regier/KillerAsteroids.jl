@@ -1,9 +1,9 @@
+const dat_dir = joinpath(Pkg.dir("KillerAsteroids"), "dat")
+
 
 function load_wise_psf(band_id::Int64)
     # TODO: sensible normalization
     # TODO: checks on the input values(?)
-
-    psf_dir = ENV["WISE_ETC"]
 
     psf_fnames = ["psf_coeff-w1.v1.fits",
                   "psf_coeff-w2.v1.fits",
@@ -11,7 +11,7 @@ function load_wise_psf(band_id::Int64)
                   "psf_coeff-taper-w4.fits" ]
 
     psf_fname = psf_fnames[band_id]
-    psf_fname = joinpath(psf_dir, psf_fname)
+    psf_fname = joinpath(dat_dir, psf_fname)
     
     f = FITS(psf_fname)
     psf_model = read(f[1])
