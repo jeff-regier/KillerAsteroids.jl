@@ -1,6 +1,6 @@
 
 function compute_log_prior(ast::AsteroidParams, prior::Prior)
-    logpdf(prior.r, ast.r) * logpdf(prior.v, ast.v)
+    logpdf(prior.r, ast.r) + logpdf(prior.v, ast.v)
 end
 
 """

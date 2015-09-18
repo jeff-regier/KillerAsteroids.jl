@@ -13,10 +13,10 @@ function test_truth_most_likely_with_all_synthetic_data()
 
     prior = sample_prior()
 
-    good_ast = AsteroidParams(10., [20, 12.], [3.1, 5.1])
+    good_ast = AsteroidParams(100000., [20, 12.], [3.1, 5.1])
     good_ll = compute_log_probability(good_ast, test_img, prior)
 
-    bad_ast = AsteroidParams(10., [19.4, 12.], [3.1, 5.1])
+    bad_ast = AsteroidParams(100000., [19.4, 12.], [3.1, 5.1])
     bad_ll = compute_log_probability(bad_ast, test_img, prior)
 
     info("$good_ll > $bad_ll")
@@ -33,10 +33,10 @@ function test_truth_most_likely_with_wise_psf()
     test_img = generate_sample_image(psf)
     prior = sample_prior()
 
-    good_ast = AsteroidParams(10., [20, 12.], [3.1, 5.1])
+    good_ast = AsteroidParams(100000., [20, 12.], [3.1, 5.1])
     good_ll = compute_log_probability(good_ast, test_img, prior)
 
-    bad_ast = AsteroidParams(10., [19.4, 12.], [3.1, 5.1])
+    bad_ast = AsteroidParams(100000., [19.4, 12.], [3.1, 5.1])
     bad_ll = compute_log_probability(bad_ast, test_img, prior)
 
     info("$good_ll > $bad_ll")
