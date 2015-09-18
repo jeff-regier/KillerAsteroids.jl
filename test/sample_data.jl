@@ -8,7 +8,8 @@ end
 
 function generate_sample_image(psf::Matrix{Float64})
     H, W = 30, 30
-    nmgy_per_dn = 1 / 112  # is this realistic value?
+    # use the  band 2 value : 
+    nmgy_per_dn = 14.5 # approximate value for W2
     sky_noise_mean = 40 * nmgy_per_dn
     read_noise_var = 7.78  # in DN^2
     # Not sure if gain matters...the Poisson noise is in DN, not in number
@@ -20,7 +21,7 @@ function generate_sample_image(psf::Matrix{Float64})
     sky_read_rv = Normal(sky_noise_mean, sqrt(pixel_var))
     pixels = rand(sky_read_rv, H, W)
 
-    ast = AsteroidParams(10.3, [20, 12.], [3.1, 5.1])
+    ast = AsteroidParams(100000., [20, 12.], [3.1, 5.1])
     ast_r_dn = ast.r / nmgy_per_dn
     for w2 in 1:5, h2 in 1:5
         h = round(Int, ast.u[1]) + h2 - 3
