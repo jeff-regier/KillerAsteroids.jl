@@ -1,31 +1,27 @@
 using Distributions
 
 
-function wrapped_poisson(rate::Float64)
-    0 < rate ? float(rand(Poisson(rate))) : 0.
-end
-
+const good_ast = AsteroidParams(10_000., [20, 12.], [3.1, 5.1])
 
 function generate_sample_image(psf::Matrix{Float64})
     H, W = 30, 30
     # use the  band 2 value : 
-    nmgy_per_dn = 14.5 # approximate value for W2
-    sky_noise_mean = 40 * nmgy_per_dn
-    read_noise_var = 7.78  # in DN^2
+    nmgy_per_dn = 14.5  # approximate value for W2
+    sky_noise_mean = 40  # approx value for W2, in DN
+    read_noise_var = 7.78  # approx value for W2, in DN^2
     # Not sure if gain matters...the Poisson noise is in DN, not in number
     # of photoelectrons...
     gain = 4.60
 
-    sky_noise_dn = sky_noise_mean / nmgy_per_dn
-    pixel_var = sky_noise_dn + read_noise_var
+    pixel_var = sky_noise_mean + read_noise_var
     sky_read_rv = Normal(sky_noise_mean, sqrt(pixel_var))
     pixels = rand(sky_read_rv, H, W)
 
-    ast = AsteroidParams(100000., [20, 12.], [3.1, 5.1])
-    ast_r_dn = ast.r / nmgy_per_dn
+    ast_r_dn = good_ast.r / nmgy_per_dn
+    @assert size(psf) == (5, 5)
     for w2 in 1:5, h2 in 1:5
-        h = round(Int, ast.u[1]) + h2 - 3
-        w = round(Int, ast.u[2]) + w2 - 3
+        h = round(Int, good_ast.u[1]) + h2 - 3
+        w = round(Int, good_ast.u[2]) + w2 - 3
         ast_r_pixel_dn =  ast_r_dn * psf[h2, w2]
         pixels[h, w] += rand() * sqrt(ast_r_pixel_dn) + ast_r_pixel_dn
     end
