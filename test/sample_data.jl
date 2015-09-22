@@ -44,7 +44,9 @@ end
 
 
 function sample_prior()
-    r_prior = LogNormal(15., sqrt(50)) # mode is 1000
+    # r_prior: mean = 7332; median = 4447; mode=1635; sd=9611
+    r_prior = LogNormal(8.4, 1)
+
     v_prior = MvNormal([3., 5], [4. 1; 3 2]) # pixels / second
 
     Prior(r_prior, v_prior)
