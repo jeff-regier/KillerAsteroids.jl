@@ -46,30 +46,29 @@ function test_truth_most_likely_with_wise_psf()
     @test good_ll > bad_ll
 end
 
-function test_real_bright()
-    band_id = 2
+function test_real_bright(band_id::Int64)
     halfsidelen = 2
     psf = load_wise_psf(band_id, halfsidelen) # sidelength will be 2*2 + 1
     psf /= sum(psf)
 
-    f = FITS("../dat/stereoskopia_w2.fits")
+    f = FITS(string("../dat/stereoskopia_w",string(band_id),".fits"))
     pixels = read(f[1])
 
     sz = size(pixels)
 
     H = sz[1]
     W = sz[2]
-    nmgy_per_dn = 14.5
-    sky_noise_mean = 53
-    read_noise_var = 7.78
-    gain = 4.60
+    nmgy_per_dn = [5.0, 14.5]
+    sky_noise_mean = [22, 53]
+    read_noise_var = [9.95, 7.78]
+    gain = [3.75, 4.60]
 
-    real_img = Image(H, W, pixels, nmgy_per_dn, sky_noise_mean, read_noise_var,gain, psf, 2, 0.)
+    real_img = Image(H, W, pixels, nmgy_per_dn[band_id], sky_noise_mean[band_id], read_noise_var[band_id],gain[band_id], psf, band_id, 0.)
 
     prior = sample_prior()
 
-    ast_flux_nmgy = 47165.5
-    ast = AsteroidParams(ast_flux_nmgy, [15., 15.], [0., 0.])
+    ast_flux_nmgy = [10729.9, 47165.5]
+    ast = AsteroidParams(ast_flux_nmgy[band_id], [15., 15.], [0., 0.])
     good_ll = compute_log_probability(ast, real_img, prior)
 
     # try an asteroid with the right brightness but wrong position
@@ -124,5 +123,5 @@ end
 
 test_truth_most_likely_with_all_synthetic_data()
 test_truth_most_likely_with_wise_psf()
+test_real_bright(2)
 test_truth_most_likely_with_all_real_data()
-test_real_bright()
