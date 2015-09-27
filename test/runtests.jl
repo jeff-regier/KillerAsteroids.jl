@@ -1,5 +1,6 @@
 using KillerAsteroids
 using Base.Test
+using FITSIO
 
 include("sample_data.jl")
 
@@ -45,6 +46,54 @@ function test_truth_most_likely_with_wise_psf()
     @test good_ll > bad_ll
 end
 
+function test_real_bright()
+    band_id = 2
+    halfsidelen = 2
+    psf = load_wise_psf(band_id, halfsidelen) # sidelength will be 2*2 + 1
+    psf /= sum(psf)
+
+    f = FITS("../dat/stereoskopia_w2.fits")
+    pixels = read(f[1])
+
+    sz = size(pixels)
+
+    H = sz[1]
+    W = sz[2]
+    nmgy_per_dn = 14.5
+    sky_noise_mean = 53
+    read_noise_var = 7.78
+    gain = 4.60
+
+    real_img = Image(H, W, pixels, nmgy_per_dn, sky_noise_mean, read_noise_var,gain, psf, 2, 0.)
+
+    prior = sample_prior()
+
+    ast_flux_nmgy = 47165.5
+    ast = AsteroidParams(ast_flux_nmgy, [15., 15.], [0., 0.])
+    good_ll = compute_log_probability(ast, real_img, prior)
+
+    # try an asteroid with the right brightness but wrong position
+    bad_ast = AsteroidParams(ast.r, [20., 12.], ast.v)
+    bad_ll = compute_log_probability(bad_ast, real_img, prior)
+
+    info("$good_ll > $bad_ll")
+    @test good_ll > bad_ll
+
+    # try an asteroid with the right position but too faint
+    bad_ast = AsteroidParams(0.1*ast.r,ast.u, ast.v)
+    bad_ll = compute_log_probability(bad_ast, real_img, prior)
+
+    info("$good_ll > $bad_ll")
+    @test good_ll > bad_ll
+
+    # try an asteroid with the right position but too bright
+    bad_ast = AsteroidParams(10.0*ast.r,ast.u, ast.v)
+    bad_ll = compute_log_probability(bad_ast, real_img, prior)
+
+    info("$good_ll > $bad_ll")
+    @test good_ll > bad_ll
+
+end
 
 # thats the actual path for asteroid 2005_UT453 has the highest
 # probability according to our model
@@ -76,3 +125,4 @@ end
 test_truth_most_likely_with_all_synthetic_data()
 test_truth_most_likely_with_wise_psf()
 test_truth_most_likely_with_all_real_data()
+test_real_bright()
