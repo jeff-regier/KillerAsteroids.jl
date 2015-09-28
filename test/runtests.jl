@@ -46,12 +46,16 @@ function test_truth_most_likely_with_wise_psf()
     @test good_ll > bad_ll
 end
 
-function test_real_bright(band_id::Int64)
+function test_truth_most_likely_with_real_bright_asteroid(band_id::Int64)
     halfsidelen = 2
     psf = load_wise_psf(band_id, halfsidelen) # sidelength will be 2*2 + 1
     psf /= sum(psf)
 
-    f = FITS(string("../dat/stereoskopia_w",string(band_id),".fits"))
+    fdir = joinpath(Pkg.dir("KillerAsteroids"), "dat")
+    fname = string("stereoskopia_w", string(band_id),".fits")
+    fname = joinpath(fdir, fname)
+
+    f = FITS(fname)
     pixels = read(f[1])
 
     sz = size(pixels)
@@ -63,7 +67,9 @@ function test_real_bright(band_id::Int64)
     read_noise_var = [9.95, 7.78]
     gain = [3.75, 4.60]
 
-    real_img = Image(H, W, pixels, nmgy_per_dn[band_id], sky_noise_mean[band_id], read_noise_var[band_id],gain[band_id], psf, band_id, 0.)
+    real_img = Image(H, W, pixels, nmgy_per_dn[band_id], 
+                     sky_noise_mean[band_id], read_noise_var[band_id], 
+                     gain[band_id], psf, band_id, 0.)
 
     prior = sample_prior()
 
@@ -123,5 +129,5 @@ end
 
 test_truth_most_likely_with_all_synthetic_data()
 test_truth_most_likely_with_wise_psf()
-test_real_bright(2)
+test_truth_most_likely_with_real_bright_asteroid(2)
 test_truth_most_likely_with_all_real_data()
