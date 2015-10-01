@@ -1,6 +1,11 @@
 
 function compute_log_prior(asteroids::Vector{AsteroidParams}, prior::Prior)
-    sum([logpdf(prior.r, ast.r) + logpdf(prior.v, ast.v) for ast in asteroids])
+    lp = logpdf(prior.S, length(asteroids))
+    for ast in asteroids
+        lp += logpdf(prior.r, ast.r)
+        lp += logpdf(prior.v, ast.v)
+    end
+    lp
 end
 
 """
