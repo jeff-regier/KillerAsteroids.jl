@@ -144,6 +144,7 @@ end
 
 test_truth_most_likely_with_all_synthetic_data()
 test_truth_most_likely_with_wise_psf()
+test_truth_most_likely_with_real_bright_asteroid(1)
 test_truth_most_likely_with_real_bright_asteroid(2)
 test_truth_most_likely_with_all_real_data()
 test_variable_numbers_of_asteroids()
