@@ -14,10 +14,10 @@ function test_truth_most_likely_with_all_synthetic_data()
 
     prior = sample_prior()
 
-    good_ll = compute_log_probability(good_ast, test_img, prior)
+    good_ll = compute_log_probability([good_ast,], [test_img,], prior)
 
     bad_ast = AsteroidParams(good_ast.r, [19.4, 12.], good_ast.v)
-    bad_ll = compute_log_probability(bad_ast, test_img, prior)
+    bad_ll = compute_log_probability([bad_ast,], [test_img,], prior)
 
     info("$good_ll > $bad_ll")
     @test good_ll > bad_ll
@@ -37,10 +37,10 @@ function test_truth_most_likely_with_wise_psf()
 
     prior = sample_prior()
 
-    good_ll = compute_log_probability(good_ast, test_img, prior)
+    good_ll = compute_log_probability([good_ast,], [test_img,], prior)
 
     bad_ast = AsteroidParams(good_ast.r, [19.4, 12.], good_ast.v)
-    bad_ll = compute_log_probability(bad_ast, test_img, prior)
+    bad_ll = compute_log_probability([bad_ast,], [test_img,], prior)
 
     info("$good_ll > $bad_ll")
     @test good_ll > bad_ll
@@ -75,25 +75,25 @@ function test_truth_most_likely_with_real_bright_asteroid(band_id::Int64)
 
     ast_flux_nmgy = [10729.9, 47165.5]
     ast = AsteroidParams(ast_flux_nmgy[band_id], [15., 15.], [0., 0.])
-    good_ll = compute_log_probability(ast, real_img, prior)
+    good_ll = compute_log_probability([ast,], [real_img,], prior)
 
     # try an asteroid with the right brightness but wrong position
     bad_ast = AsteroidParams(ast.r, [20., 12.], ast.v)
-    bad_ll = compute_log_probability(bad_ast, real_img, prior)
+    bad_ll = compute_log_probability([bad_ast,], [real_img,], prior)
 
     info("$good_ll > $bad_ll")
     @test good_ll > bad_ll
 
     # try an asteroid with the right position but too faint
     bad_ast = AsteroidParams(0.1*ast.r,ast.u, ast.v)
-    bad_ll = compute_log_probability(bad_ast, real_img, prior)
+    bad_ll = compute_log_probability([bad_ast,], [real_img,], prior)
 
     info("$good_ll > $bad_ll")
     @test good_ll > bad_ll
 
     # try an asteroid with the right position but too bright
     bad_ast = AsteroidParams(10.0*ast.r,ast.u, ast.v)
-    bad_ll = compute_log_probability(bad_ast, real_img, prior)
+    bad_ll = compute_log_probability([bad_ast,], [real_img,], prior)
 
     info("$good_ll > $bad_ll")
     @test good_ll > bad_ll
@@ -111,19 +111,34 @@ function test_truth_most_likely_with_all_real_data()
 
     # Possible steps to writing this test:
     #
-    # 1. image_stack = <load images of 2005_UT453 taken in band 2>
+    # 1. images = <load images of 2005_UT453 taken in band 2>
     # 2. good_ast = <load the true band 2 brigthness of the 2005_UT453,
     #           its true position (in pixel coordinates at time 0)
     #           and its true velocity during the image exposures>
     #           Note: time 0 can be time of the first image in the stack
-    # 3. good_ll compute_log_prob(good_ast, image_stack, prior), where
+    # 3. good_ll compute_log_prob([good_ast,], images, prior), where
     #            prior is set like it's done in sample_prior(), but with
     #            more realistic values
     # 4. for a variety of bad_ast, some perhaps not all that different
     #    from good_ast, do 
-    #             bad_ll = compute_log_prob(bad_ast, image_stack, prior)
+    #             bad_ll = compute_log_prob([bad_ast,], images, prior)
     #    and
     #          @test bad_ll < good_ll
+end
+
+
+function test_variable_numbers_of_asteroids()
+    test_img = generate_sample_image()
+    prior = sample_prior()
+    good_ll = compute_log_probability([good_ast,], [test_img,], prior)
+
+    bad_ll_0 = compute_log_probability(AsteroidParams[], [test_img,], prior)
+    info("$good_ll > $bad_ll_0")
+    @test good_ll > bad_ll_0
+
+    bad_ll_2 = compute_log_probability([good_ast, good_ast], [test_img,], prior)
+    info("$good_ll > $bad_ll_2")
+    @test good_ll > bad_ll_2
 end
 
 
@@ -131,3 +146,5 @@ test_truth_most_likely_with_all_synthetic_data()
 test_truth_most_likely_with_wise_psf()
 test_truth_most_likely_with_real_bright_asteroid(2)
 test_truth_most_likely_with_all_real_data()
+test_variable_numbers_of_asteroids()
+

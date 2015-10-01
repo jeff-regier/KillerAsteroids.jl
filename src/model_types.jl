@@ -27,6 +27,7 @@ immutable Prior
     r::LogNormal
     #TODO: specify a prior over asteroids' colors
     v::MvNormal
+    S::Poisson  # the number of asteroids in the images
 end
 
 
