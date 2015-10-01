@@ -12,6 +12,6 @@ include("wise_utils.jl")
 export Image, AsteroidParams, Prior
 export compute_log_probability, compute_log_likelihood
 export load_wise_psf
-export wise_params
+export wise_band_to_params
 
 end # module

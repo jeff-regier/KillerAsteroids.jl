@@ -63,12 +63,13 @@ function test_truth_most_likely_with_real_bright_asteroid(band_id::Int64)
     H = sz[1]
     W = sz[2]
 
-    par = wise_params(band_id)
+    par = wise_band_to_params[band_id]
+
     sky_noise_mean = [22, 53]
 
-    real_img = Image(H, W, pixels, par["nmgy_per_dn"], 
-                     sky_noise_mean[band_id], par["read_noise_var"], 
-                     par["gain"], psf, band_id, 0.)
+    real_img = Image(H, W, pixels, par.nmgy_per_dn, 
+                     sky_noise_mean[band_id], par.read_noise_var, 
+                     par.gain, psf, band_id, 0.)
 
     prior = sample_prior()
 
