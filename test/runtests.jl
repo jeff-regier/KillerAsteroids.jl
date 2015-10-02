@@ -141,6 +141,38 @@ function test_variable_numbers_of_asteroids()
     @test good_ll > bad_ll_2
 end
 
+function test_asteroid_partially_off_edge()
+
+    band_id = 1
+    halfsidelen = 10
+    psf = load_wise_psf(band_id, halfsidelen)
+    psf /= sum(psf)
+
+    fdir = joinpath(Pkg.dir("KillerAsteroids"), "dat")
+    fname = string("stereoskopia_w", string(band_id),".fits")
+    fname = joinpath(fdir, fname)
+
+    f = FITS(fname)
+    pixels = read(f[1])
+
+    sz = size(pixels)
+
+    H = sz[1]
+    W = sz[2]
+
+    par = wise_band_to_params[band_id]
+
+    sky_noise_mean = 22
+
+    real_img = Image(H, W, pixels, par.nmgy_per_dn, 
+                     sky_noise_mean, par.read_noise_var, 
+                     par.gain, psf, band_id, 0.)
+
+    prior = sample_prior()
+    edge_ast = AsteroidParams(10729.9, [25, 15], [0., 0.])
+    edge_ll = compute_log_probability([edge_ast,], [real_img,], prior)
+
+end
 
 test_truth_most_likely_with_all_synthetic_data()
 test_truth_most_likely_with_wise_psf()
@@ -148,4 +180,4 @@ test_truth_most_likely_with_real_bright_asteroid(1)
 test_truth_most_likely_with_real_bright_asteroid(2)
 test_truth_most_likely_with_all_real_data()
 test_variable_numbers_of_asteroids()
-
+test_asteroid_partially_off_edge()

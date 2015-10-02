@@ -38,6 +38,9 @@ function compute_log_likelihood(asteroids::Vector{AsteroidParams},
             for w2 in 1:psf_dims[2], h2 in 1:psf_dims[1]
                 h = u_t_px[1] + h2 - psf_center[1]
                 w = u_t_px[2] + w2 - psf_center[2]
+                if (h > img.H) || (w > img.W) || (h < 1) || (w < 1)  
+                    continue
+                end
                 expected_ast_dn = ast_r_dn * img.psf[h2, w2]
                 expected_dn[h, w] += expected_ast_dn
             end
