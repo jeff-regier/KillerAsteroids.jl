@@ -4,17 +4,20 @@ using FITSIO
 
 include("sample_data.jl")
 
+const dat_dir = joinpath(Pkg.dir("KillerAsteroids"), "dat")
+
 
 function test_truth_most_likely_with_all_synthetic_data()
     test_img = generate_sample_image()
-
     # it's a pretty bright asteroid, so even with the psf,
     # the pixel that contains the asteroid should be the brightest
     @test_approx_eq test_img.pixels[20, 12] maximum(test_img.pixels)
 
     good_ll = compute_log_probability([sample_ast,], [test_img,], sample_prior)
 
-    bad_ast = AsteroidParams(sample_ast.r, [19.4, 12.], sample_ast.v)
+    bad_u_px_crd = [19.4, 12.]
+    bad_u = wcsp2s(test_img.wcs, bad_u_px_crd'')[:]
+    bad_ast = AsteroidParams(sample_ast.r, bad_u, sample_ast.v)
     bad_ll = compute_log_probability([bad_ast,], [test_img,], sample_prior)
 
     info("$good_ll > $bad_ll")
@@ -28,71 +31,74 @@ function test_truth_most_likely_with_wise_psf()
     psf = load_wise_psf(band_id, halfsidelen) # sidelength will be 2*2 + 1
     psf /= sum(psf)
 
-    test_img = generate_sample_image(psf)
+    test_img = generate_sample_image(psf=psf)
 
     # the pixel that contains the asteroid should be the brightest
     @test_approx_eq test_img.pixels[20, 12] maximum(test_img.pixels)
 
     good_ll = compute_log_probability([sample_ast,], [test_img,], sample_prior)
 
-    bad_ast = AsteroidParams(sample_ast.r, [19.4, 12.], sample_ast.v)
+    bad_u_px_crd = [19.4, 12.]
+    bad_u = wcsp2s(test_img.wcs, bad_u_px_crd'')[:]
+    bad_ast = AsteroidParams(sample_ast.r, bad_u, sample_ast.v)
     bad_ll = compute_log_probability([bad_ast,], [test_img,], sample_prior)
 
     info("$good_ll > $bad_ll")
     @test good_ll > bad_ll
 end
 
+
 function test_truth_most_likely_with_real_bright_asteroid(band_id::Int64)
     halfsidelen = 2
     psf = load_wise_psf(band_id, halfsidelen) # sidelength will be 2*2 + 1
     psf /= sum(psf)
 
-    fdir = joinpath(Pkg.dir("KillerAsteroids"), "dat")
-    fname = string("stereoskopia_w", string(band_id),".fits")
-    fname = joinpath(fdir, fname)
-
+    fname = joinpath(dat_dir, "stereoskopia_w$band_id.fits")
     f = FITS(fname)
     pixels = read(f[1])
+    header_str = read_header(f[1], ASCIIString)
+    close(f)
 
-    sz = size(pixels)
+    H, W = size(pixels)
+    par = wise_band_to_params[band_id]
+    sky_noise_mean = [22., 53.]
+    wcs = wcspih(header_str)[1][1]
 
-    H = sz[1]
-    W = sz[2]
-    nmgy_per_dn = [5.0, 14.5]
-    sky_noise_mean = [22, 53]
-    read_noise_var = [9.95, 7.78]
-    gain = [3.75, 4.60]
+    real_img = Image(H, W, pixels, sky_noise_mean[band_id], psf, 
+                        band_id, 0., wcs)
 
-    real_img = Image(H, W, pixels, nmgy_per_dn[band_id], 
-                     sky_noise_mean[band_id], read_noise_var[band_id], 
-                     gain[band_id], psf, band_id, 0.)
-
-    ast_flux_nmgy = [10729.9, 47165.5]
-    ast = AsteroidParams(ast_flux_nmgy[band_id], [15., 15.], [0., 0.])
+    # TODO: fill in bands 3 and 4 with their actual real values
+    ast_flux_nmgy = [10729.9, 47165.5, 33333., 33333.]
+    ast_u_px_crd = [15., 15.]
+    ast_u = wcsp2s(wcs, ast_u_px_crd'')[:]
+    ast = AsteroidParams(ast_flux_nmgy, ast_u, [0., 0.])
     good_ll = compute_log_probability([ast,], [real_img,], sample_prior)
 
     # try an asteroid with the right brightness but wrong position
-    bad_ast = AsteroidParams(ast.r, [20., 12.], ast.v)
+    bad_u_px_crd = [20, 12.]
+    bad_u = wcsp2s(wcs, bad_u_px_crd'')[:]
+    bad_ast = AsteroidParams(ast.r, bad_u, ast.v)
     bad_ll = compute_log_probability([bad_ast,], [real_img,], sample_prior)
 
     info("$good_ll > $bad_ll")
     @test good_ll > bad_ll
 
     # try an asteroid with the right position but too faint
-    bad_ast = AsteroidParams(0.1*ast.r,ast.u, ast.v)
+    bad_ast = AsteroidParams(0.1 * ast.r, ast.u, ast.v)
     bad_ll = compute_log_probability([bad_ast,], [real_img,], sample_prior)
 
     info("$good_ll > $bad_ll")
     @test good_ll > bad_ll
 
     # try an asteroid with the right position but too bright
-    bad_ast = AsteroidParams(10.0*ast.r,ast.u, ast.v)
+    bad_ast = AsteroidParams(10.0 * ast.r, ast.u, ast.v)
     bad_ll = compute_log_probability([bad_ast,], [real_img,], sample_prior)
 
     info("$good_ll > $bad_ll")
     @test good_ll > bad_ll
 
 end
+
 
 # thats the actual path for asteroid 2005_UT453 has the highest
 # probability according to our model
@@ -136,9 +142,37 @@ function test_variable_numbers_of_asteroids()
 end
 
 
+function test_asteroid_partially_off_edge()
+    band_id = 1
+    halfsidelen = 10
+    psf = load_wise_psf(band_id, halfsidelen)
+    psf /= sum(psf)
+
+    fname = joinpath(dat_dir, "stereoskopia_w$band_id.fits")
+    f = FITS(fname)
+    pixels = read(f[1])
+    header_str = read_header(f[1], ASCIIString)
+    close(f)
+
+    H, W = size(pixels)
+    par = wise_band_to_params[band_id]
+    sky_noise_mean = 22.
+    wcs = wcspih(header_str)[1][1]
+
+    real_img = Image(H, W, pixels, sky_noise_mean, psf, band_id, 0., wcs)
+
+    edge_u_px_crd = [25., 15.]
+    edge_u = wcsp2s(wcs, edge_u_px_crd'')[:]
+    sample_r = fill(10729.9, B)
+    edge_ast = AsteroidParams(sample_r, edge_u, [0., 0.])
+    edge_ll = compute_log_probability([edge_ast,], [real_img,], sample_prior)
+end
+
+
 test_truth_most_likely_with_all_synthetic_data()
 test_truth_most_likely_with_wise_psf()
+test_truth_most_likely_with_real_bright_asteroid(1)
 test_truth_most_likely_with_real_bright_asteroid(2)
 test_truth_most_likely_with_all_real_data()
 test_variable_numbers_of_asteroids()
-
+test_asteroid_partially_off_edge()
