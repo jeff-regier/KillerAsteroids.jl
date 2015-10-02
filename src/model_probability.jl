@@ -2,7 +2,7 @@
 function compute_log_prior(asteroids::Vector{AsteroidParams}, prior::Prior)
     lp = logpdf(prior.S, length(asteroids))
     for ast in asteroids
-        lp += logpdf(prior.r, ast.r)
+        lp += logpdf(prior.log_r, log(ast.r))
         lp += logpdf(prior.v, ast.v)
     end
     lp
@@ -33,8 +33,9 @@ function compute_log_likelihood(asteroids::Vector{AsteroidParams},
 
         for ast in asteroids
             u_t = extrapolate_position(ast.u, ast.v, img.t)
-            u_t_px = round(Int, u_t)
-            ast_r_dn = ast.r / img.nmgy_per_dn
+            u_t_px_crd = wcss2p(img.wcs, u_t)
+            u_t_px = round(Int, u_t)  # the psf is constant per pixel for now
+            ast_r_dn = ast.r[img.band_id] / img.nmgy_per_dn
             for w2 in 1:psf_dims[2], h2 in 1:psf_dims[1]
                 h = u_t_px[1] + h2 - psf_center[1]
                 w = u_t_px[2] + w2 - psf_center[2]

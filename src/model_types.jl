@@ -10,6 +10,7 @@ immutable Image
     psf::Matrix{Float64}  # the point spread function
     band_id::Int64  # identifies the filter band for this image (1,2,3 or 4)
     t::Float64  # the time the image was taken (Or is this an integer?)
+    wcs::WCSLIB.wcsprm  # the image position
 end
 
 
@@ -17,17 +18,15 @@ end
 immutable AsteroidParams
     #TODO: specify the asteroid brightness in each band
     # (for now only use images in the same band)
-    r::Float64  # brightness in nanomaggies
-    u::Vector{Float64}  # position at time 0
+    r::Vector{Float64}  # brightness in each band in nanomaggies
+    u::Vector{Float64}  # position (ra / dec) at time 0
     v::Vector{Float64}  # velocity (constant over time)
 end
 
 
 immutable Prior
-    r::LogNormal
-    #TODO: specify a prior over asteroids' colors
-    v::MvNormal
-    S::Poisson  # the number of asteroids in the images
+    log_r::MvNormal # log brightness in each of the 4 bands (nanomaggies)
+    v::MvNormal  # velocity in units of (ra, dec) / whatever units Image.t is in
+    S::Poisson  # number of asteroids in the collection of images
 end
-
 
