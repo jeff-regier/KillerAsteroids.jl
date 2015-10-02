@@ -2,7 +2,7 @@
 function compute_log_prior(asteroids::Vector{AsteroidParams}, prior::Prior)
     lp = logpdf(prior.S, length(asteroids))
     for ast in asteroids
-        lp += logpdf(prior.r, ast.r)
+        lp += logpdf(prior.log_r, log(ast.r))
         lp += logpdf(prior.v, ast.v)
     end
     lp
@@ -31,10 +31,14 @@ function compute_log_likelihood(asteroids::Vector{AsteroidParams},
         expected_dn = similar(img.pixels)
         fill!(expected_dn, img.sky_noise_mean)
 
+        read_noise_var = wise_band_to_params[img.band_id].read_noise_var
+        nmgy_per_dn = wise_band_to_params[img.band_id].nmgy_per_dn
+
         for ast in asteroids
             u_t = extrapolate_position(ast.u, ast.v, img.t)
-            u_t_px = round(Int, u_t)
-            ast_r_dn = ast.r / img.nmgy_per_dn
+            u_t_px_crd = wcss2p(img.wcs, u_t'')
+            u_t_px = round(Int, u_t_px_crd)  # the psf is constant per pixel for now
+            ast_r_dn = ast.r[img.band_id] / nmgy_per_dn
             for w2 in 1:psf_dims[2], h2 in 1:psf_dims[1]
                 h = u_t_px[1] + h2 - psf_center[1]
                 w = u_t_px[2] + w2 - psf_center[2]
@@ -47,7 +51,7 @@ function compute_log_likelihood(asteroids::Vector{AsteroidParams},
         end
 
         for w in 1:img.W, h in 1:img.H
-            pixel_dn_var = expected_dn[h, w] + img.read_noise_var
+            pixel_dn_var = expected_dn[h, w] + read_noise_var
             pixel_dist = Normal(expected_dn[h, w], sqrt(pixel_dn_var))
             ll += logpdf(pixel_dist, img.pixels[h, w])
         end
