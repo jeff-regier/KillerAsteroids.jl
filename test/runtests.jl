@@ -164,6 +164,23 @@ function test_truth_most_likely_with_multiple_images()
     @test correct_ast_lp > wrong_v_lp2
 end
 
+function test_image_file_name()
+
+  band_id = 1
+  scan_id = "00918a"
+  frame_num = 148
+
+  fname = l1b_image_name(band_id, scan_id, frame_num, dat_dir)
+
+  @test isfile(fname)
+
+  f = FITS(fname)
+  l1b_image = read(f[1])
+
+  @test size(l1b_image) == (1016, 1016)
+
+end
+
 # thats the actual path for asteroid 2005_UT453 has the highest
 # probability according to our model
 function test_truth_most_likely_with_multiple_real_images()
@@ -199,4 +216,4 @@ test_variable_numbers_of_asteroids()
 test_asteroid_partially_off_edge()
 test_truth_most_likely_with_multiple_images()
 test_truth_most_likely_with_multiple_real_images()
-
+test_image_file_name()
