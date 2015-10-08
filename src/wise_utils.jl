@@ -6,12 +6,13 @@ immutable WiseBandParams
     nmgy_per_dn::Float64
     read_noise_var::Float64
     gain::Float64
+    l1b_sidelength::Int64
 
 end
 
 const wise_band_to_params = [
-   WiseBandParams(5.0, 9.95, 3.75),
-   WiseBandParams(14.5, 7.78, 4.6)
+   WiseBandParams(5.0, 9.95, 3.75, 1016),
+   WiseBandParams(14.5, 7.78, 4.6, 1016)
 ]
 
 # total number of bands in WISE
