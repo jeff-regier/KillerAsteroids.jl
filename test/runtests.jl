@@ -177,7 +177,9 @@ function test_image_file_name()
   f = FITS(fname)
   l1b_image = read(f[1])
 
-  @test size(l1b_image) == (1016, 1016)
+  par = wise_band_to_params[band_id]
+
+  @test size(l1b_image) == (par.l1b_sidelength, par.l1b_sidelength)
 
 end
 
