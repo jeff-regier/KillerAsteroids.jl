@@ -28,6 +28,7 @@ function compute_log_likelihood(asteroids::Vector{AsteroidParams},
     for img in images
         psf_dims = size(img.psf)
         psf_center = [round(Int, (dim + 1) / 2) for dim in size(img.psf)]
+        psf_itp = interpolate(img.psf, BSpline(Linear()), OnGrid())
         expected_dn = similar(img.pixels)
         fill!(expected_dn, img.sky_noise_mean)
 
@@ -37,15 +38,24 @@ function compute_log_likelihood(asteroids::Vector{AsteroidParams},
         for ast in asteroids
             u_t = extrapolate_position(ast.u, ast.v, img.t)
             u_t_px_crd = wcss2p(img.wcs, u_t'')
-            u_t_px = round(Int, u_t_px_crd)  # the psf is constant per pixel for now
+            u_t_px = round(Int, u_t_px_crd)
+            offset = u_t_px_crd - u_t_px
+
             ast_r_dn = ast.r[img.band_id] / nmgy_per_dn
-            for w2 in 1:psf_dims[2], h2 in 1:psf_dims[1]
+            for w2 in 2:(psf_dims[2]-1), h2 in 2:(psf_dims[1]-1)
                 h = u_t_px[1] + h2 - psf_center[1]
                 w = u_t_px[2] + w2 - psf_center[2]
                 if (h > img.H) || (w > img.W) || (h < 1) || (w < 1)  
                     continue
                 end
-                expected_ast_dn = ast_r_dn * img.psf[h2, w2]
+                h3 = h2 + offset[1]
+                w3 = w2 + offset[2]
+                expected_ast_dn = ast_r_dn * psf_itp[h3, w3]
+                if (psf_itp[h3, w3] < 0)
+                    println(h3, "  ", w3)
+                    println(img.psf)
+                end
+                @assert(psf_itp[h3, w3] >= 0)
                 expected_dn[h, w] += expected_ast_dn
             end
         end
