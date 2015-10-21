@@ -36,3 +36,21 @@ function l1b_image_dir(scan_id::String, frame_num::Int64, basedir::String)
     dir = joinpath(basedir, scan_id[5:6], scan_id, subdir)
 
 end
+
+function l1b_bool_mask(msk::Matrix{Int64}, im::Matrix{Float64})
+
+# construct a boolean image mask based on WISE L1b mask bits and intensity
+# image values
+
+# cosmic rays
+    cr = ((msk & 2^28) .!= 0)
+
+# other bad pixels
+    bad = ((msk & 255) .!= 0)
+
+# NaNs
+    _nan = isnan(im)
+
+    is_bad = (cr | bad | _nan)
+
+end

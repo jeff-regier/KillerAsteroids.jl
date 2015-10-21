@@ -181,6 +181,28 @@ function test_image_file_name()
 
   @test size(l1b_image) == (par.l1b_sidelength, par.l1b_sidelength)
 
+  mskname = l1b_image_name(band_id, scan_id, frame_num, dat_dir; im_type="msk")
+
+  @test isfile(mskname)
+
+  f = FITS(mskname)
+  l1b_msk = read(f[1])
+
+  @test size(l1b_msk) == (par.l1b_sidelength, par.l1b_sidelength)
+
+end
+
+function test_l1b_bool_mask_with_fake_data()
+
+  im = [0. 0. ; NaN 0.]
+  msk = [2^28 0 ; 1 2]
+
+  is_bad = l1b_bool_mask(msk, im)
+
+  @test size(is_bad) == (2, 2)
+  @test (is_bad[1,1] == true) & (is_bad[1,2] == false) & 
+       (is_bad[2,1] == true) & (is_bad[2,2] == true)
+
 end
 
 # thats the actual path for asteroid 2005_UT453 has the highest
@@ -219,3 +241,4 @@ test_asteroid_partially_off_edge()
 test_truth_most_likely_with_multiple_images()
 test_truth_most_likely_with_multiple_real_images()
 test_image_file_name()
+test_l1b_bool_mask_with_fake_data()
