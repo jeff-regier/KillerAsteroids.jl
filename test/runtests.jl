@@ -181,6 +181,17 @@ function test_image_file_name()
 
   @test size(l1b_image) == (par.l1b_sidelength, par.l1b_sidelength)
 
+  mskname = l1b_image_name(band_id, scan_id, frame_num, dat_dir; im_type="msk")
+
+  println(mskname)
+
+  @test isfile(mskname)
+
+  f = FITS(mskname)
+  l1b_msk = read(f[1])
+
+  @test size(l1b_msk) == (par.l1b_sidelength, par.l1b_sidelength)
+
 end
 
 # thats the actual path for asteroid 2005_UT453 has the highest
