@@ -192,6 +192,19 @@ function test_image_file_name()
 
 end
 
+function test_l1b_bool_mask_with_fake_data()
+
+  im = [0. 0. ; NaN 0.]
+  msk = [2^28 0 ; 1 2]
+
+  is_bad = l1b_bool_mask(msk, im)
+
+  @test size(is_bad) == (2, 2)
+  @test (is_bad[1,1] == true) & (is_bad[1,2] == false) & 
+       (is_bad[2,1] == true) & (is_bad[2,2] == true)
+
+end
+
 # thats the actual path for asteroid 2005_UT453 has the highest
 # probability according to our model
 function test_truth_most_likely_with_multiple_real_images()
@@ -228,3 +241,4 @@ test_asteroid_partially_off_edge()
 test_truth_most_likely_with_multiple_images()
 test_truth_most_likely_with_multiple_real_images()
 test_image_file_name()
+test_l1b_bool_mask_with_fake_data()
