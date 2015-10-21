@@ -183,8 +183,6 @@ function test_image_file_name()
 
   mskname = l1b_image_name(band_id, scan_id, frame_num, dat_dir; im_type="msk")
 
-  println(mskname)
-
   @test isfile(mskname)
 
   f = FITS(mskname)
