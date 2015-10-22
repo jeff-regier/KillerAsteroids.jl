@@ -3,6 +3,7 @@ module KillerAsteroids
 using FITSIO
 using WCSLIB
 using Distributions
+using Interpolations
 
 include("model_types.jl")
 include("model_probability.jl")
