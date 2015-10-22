@@ -18,8 +18,8 @@ const wise_band_to_params = [
 # total number of bands in WISE
 const B = 4
 
-function l1b_image_name(band_id::Int64, scan_id::String, frame_num::Int64, 
-                      l1b_dir::String; im_type::String="int")
+function l1b_image_name(band_id::Int64, scan_id::AbstractString, frame_num::Int64, 
+                      l1b_dir::AbstractString; im_type::AbstractString="int")
 
     @assert (im_type == "int") || (im_type == "msk") || (im_type == "unc")
 
@@ -30,7 +30,7 @@ function l1b_image_name(band_id::Int64, scan_id::String, frame_num::Int64,
     fname = joinpath(l1b_dir, fname)
 end
 
-function l1b_image_dir(scan_id::String, frame_num::Int64, basedir::String)
+function l1b_image_dir(scan_id::AbstractString, frame_num::Int64, basedir::AbstractString)
 
     subdir = lpad(frame_num, 3, "0")
     dir = joinpath(basedir, scan_id[5:6], scan_id, subdir)

@@ -42,7 +42,7 @@ function compute_log_likelihood(asteroids::Vector{AsteroidParams},
             offset = u_t_px_crd - u_t_px
 
             ast_r_dn = ast.r[img.band_id] / nmgy_per_dn
-            for w2 in 2:(psf_dims[2]-1), h2 in 2:(psf_dims[1]-1)
+            for w2 in 1:psf_dims[2], h2 in 1:psf_dims[1]
                 h = u_t_px[1] + h2 - psf_center[1]
                 w = u_t_px[2] + w2 - psf_center[2]
                 if (h > img.H) || (w > img.W) || (h < 1) || (w < 1)  
@@ -50,12 +50,7 @@ function compute_log_likelihood(asteroids::Vector{AsteroidParams},
                 end
                 h3 = h2 + offset[1]
                 w3 = w2 + offset[2]
-                expected_ast_dn = ast_r_dn * psf_itp[h3, w3]
-                if (psf_itp[h3, w3] < 0)
-                    println(h3, "  ", w3)
-                    println(img.psf)
-                end
-                @assert(psf_itp[h3, w3] >= 0)
+                expected_ast_dn = ast_r_dn * max(0., psf_itp[h3, w3])
                 expected_dn[h, w] += expected_ast_dn
             end
         end
