@@ -1,11 +1,4 @@
-function mask_dilate(mask, kern)
-
-  # mask needs to be all zeros and ones
-  @assert sum((mask .== 0) | (mask .== 1)) == length(mask)
-  
-  # dilation kernel needs to be all zeros and ones
-  @assert sum((kern .== 0) | (kern .== 1)) == length(kern)
-
+function mask_dilate(mask::Array{Bool, 2}, kern::Array{Bool, 2})
 
   sz_kern = size(kern)
 
@@ -18,7 +11,7 @@ function mask_dilate(mask, kern)
   # dilation kernel needs to have nonzero total 'weight'
   @assert sum(kern) != 0
 
-  w = find(mask .== 1)
+  w = find(mask)
   nw = length(w)
 
   # if the mask is empty then do nothing
@@ -35,7 +28,7 @@ function mask_dilate(mask, kern)
   x_mask = ((w-1) % nx) + 1
   y_mask = ceil(Int64, w / ny)
 
-  wkern = find(kern .== 1)
+  wkern = find(kern)
   nwkern = length(wkern)
   if nwkern == 0
       return 0*mask
@@ -61,7 +54,7 @@ function mask_dilate(mask, kern)
   nwgood = length(wgood)
   if nwgood > 0
      out = copy(mask)
-     [(out[x_add_mask[wgood[i]], y_add_mask[wgood[i]]] = 1) for i=1:nwgood]
+     [(out[x_add_mask[wgood[i]], y_add_mask[wgood[i]]] = true) for i=1:nwgood]
   end
   return out
 

@@ -207,26 +207,26 @@ end
 
 function test_mask_dilate()
 
-  mask = zeros(Int64, 5, 5)
-  mask[3, 3] = 1
-  kern = zeros(Int64, 3, 3) + 1
+  mask = zeros(Bool, 5, 5)
+  mask[3, 3] = true
+  kern = ones(Bool, 3, 3)
 
-  include(joinpath(Pkg.dir("KillerAsteroids"), "src", "mask_dilate.jl"))
+#  include(joinpath(Pkg.dir("KillerAsteroids"), "src", "mask_dilate.jl"))
 
   dil = mask_dilate(mask, kern)
 
-  dil_tru = zeros(Int64, 5, 5)
-  dil_tru[2:4, 2:4] = 1
+  dil_tru = zeros(Bool, 5, 5)
+  dil_tru[2:4, 2:4] = true
 
   @test dil == dil_tru
 
-  mask = zeros(Int64, 6, 6)
-  mask[1, 1] = 1
+  mask = zeros(Bool, 6, 6)
+  mask[1, 1] = true
 
   dil = mask_dilate(mask, kern)
 
-  dil_tru = zeros(Int64, 6, 6)
-  dil_tru[1:2, 1:2] = 1
+  dil_tru = zeros(Bool, 6, 6)
+  dil_tru[1:2, 1:2] = true
 
   @test dil == dil_tru
 
