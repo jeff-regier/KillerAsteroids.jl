@@ -205,6 +205,33 @@ function test_l1b_bool_mask_with_fake_data()
 
 end
 
+function test_mask_dilate()
+
+  mask = zeros(Bool, 5, 5)
+  mask[3, 3] = true
+  kern = ones(Bool, 3, 3)
+
+#  include(joinpath(Pkg.dir("KillerAsteroids"), "src", "mask_dilate.jl"))
+
+  dil = mask_dilate(mask, kern)
+
+  dil_tru = zeros(Bool, 5, 5)
+  dil_tru[2:4, 2:4] = true
+
+  @test dil == dil_tru
+
+  mask = zeros(Bool, 6, 6)
+  mask[1, 1] = true
+
+  dil = mask_dilate(mask, kern)
+
+  dil_tru = zeros(Bool, 6, 6)
+  dil_tru[1:2, 1:2] = true
+
+  @test dil == dil_tru
+
+end
+
 # thats the actual path for asteroid 2005_UT453 has the highest
 # probability according to our model
 function test_truth_most_likely_with_multiple_real_images()
@@ -242,3 +269,4 @@ test_truth_most_likely_with_multiple_images()
 test_truth_most_likely_with_multiple_real_images()
 test_image_file_name()
 test_l1b_bool_mask_with_fake_data()
+test_mask_dilate()
